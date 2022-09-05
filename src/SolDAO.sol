@@ -67,7 +67,7 @@ abstract contract Multicallable {
 /// @author SolDAO (https://github.com/Sol-DAO/governance/blob/main/src/SolDAO.sol)
 contract SolDAO is 
     ERC1155, 
-    Owned(msg.sender), 
+    Owned(tx.origin), 
     Multicallable 
 {   
     event SetBaseURI(string baseURI);
