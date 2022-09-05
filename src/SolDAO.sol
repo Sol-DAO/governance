@@ -69,34 +69,22 @@ contract SolDAO is
     ERC1155, 
     Owned(msg.sender), 
     Multicallable 
-{
-    event SetURIfetcher(ERC1155 indexed uriFetcher);
-
+{   
     event SetBaseURI(string baseURI);
+
+    event SetURIfetcher(ERC1155 indexed uriFetcher);
 
     event SetTransferability(uint256 id, bool set);
 
-    string public name;
+    string public constant name = "SolDAO";
 
-    string public symbol;
+    string public constant symbol = "SOLD";
 
     string public baseURI;
 
     ERC1155 public uriFetcher;
 
     mapping(uint256 => bool) public transferable;
-
-    constructor(
-        string memory _name, 
-        string memory _symbol,
-        ERC1155 _uriFetcher
-    ) payable {
-        name = _name;
-
-        symbol = _symbol;
-
-        uriFetcher = _uriFetcher;
-    }
 
     function safeTransferFrom(
         address from,
@@ -105,9 +93,9 @@ contract SolDAO is
         uint256 amount,
         bytes calldata data
     ) public override {
-        super.safeTransferFrom(from, to, id, amount, data);
-
         require(transferable[id], "NONTRANSFERABLE");
+
+        super.safeTransferFrom(from, to, id, amount, data);
     }
 
     function safeBatchTransferFrom(
@@ -117,17 +105,8 @@ contract SolDAO is
         uint256[] calldata amounts,
         bytes calldata data
     ) public override {
-        super.safeBatchTransferFrom(from, to, ids, amounts, data);
-
-        // Storing these outside the loop saves ~15 gas per iteration.
-        uint256 id;
-        uint256 amount;
-
         for (uint256 i; i < ids.length; ) {
-            id = ids[i];
-            amount = amounts[i];
-
-            require(transferable[id], "NONTRANSFERABLE");
+            require(transferable[ids[i]], "NONTRANSFERABLE");
 
             // An array can't have a total length
             // larger than the max uint256 value.
@@ -135,6 +114,8 @@ contract SolDAO is
                 ++i;
             }
         }
+
+        super.safeBatchTransferFrom(from, to, ids, amounts, data);
     }
 
     function mint(
